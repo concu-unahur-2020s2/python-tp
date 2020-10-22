@@ -23,4 +23,4 @@ Al bar llegan los proveedores y nos entregan cervezas al azar, tanto en cantidad
 	* Como siempre, hasta no llenar completamente una heladera (ambos tipos de envases), no pasamos a la siguiente.
 1. En el anterior ítem al llegar un proveedor, por un tema de cantidad de cervezas de cada envase, puede no servir para llenar la heladera primera en orden de prioridad a ser llenada.
 	* Agregar la posibilidad de poder pasar a las siguientes heladeras a ser llenadas, respetando el orden de prioridad del punto anterior.
-	* Ejemplo: la primera heladera a ser llenada le faltan 3 botellas y 10 latas, pero el proveedor cae con 5 botellas y 6 latas. Entonces las 2 botellas restantes meterlas en la siguiente heladera en la que haya lugar, respetando el orden de prioridad del del ítem anterior.
+	* Ejemplo: la primera heladera a ser llenada le faltan 3 botellas y 10 latas, pero el proveedor cae con 5 botellas y 6 latas. Entonces las 2 botellas restantes meterlas en la siguiente heladera en la que haya lugar, respetando el orden de prioridad del ítem anterior.
