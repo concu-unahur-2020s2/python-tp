@@ -12,8 +12,8 @@ Al bar llegan los proveedores y nos entregan cervezas al azar, tanto en cantidad
 
 ## Bonus
 1. Agregar beodes que consumen todo el tiempo cervezas.
-	* Consumen cada vez de una heladera al azar, y si esa heladera no tiene lo que quieren, se queda esperando.
-	* Hay beodes de diferentes gustos, algunes solamente consumen botellas de 1 litro, otres solamente latas, y otres ambos tipos de envase. 
+	* Consumen cada vez 1 cerveza de una heladera al azar, y si esa heladera no tiene lo que quieren, se queda esperando.
+	* Hay beodes de diferentes gustos, algunes solamente consumen botellas, otres solamente latas, y otres ambos tipos de envase. 
 	* Cada beode tiene un límite de consumo, luego del cual se desmaya y deja de consumir.
 	* Seguimos llenando las heladeras en el orden original, y  hasta no llenar completamente una heladera (ambos tipos de envases), no pasamos a la siguiente.
 1. Agregar que cada tanto nos damos cuenta de alguna lata que está pinchada en alguna heladera, y por lo tanto hay que sacar esa lata de esa heladera.
