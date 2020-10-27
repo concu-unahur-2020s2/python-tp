@@ -5,27 +5,45 @@ import logging
 
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(threadName)s] - %(message)s', datefmt='%H:%M:%S', level=logging.INFO)
 
-botellasSobrantes = []
-latasSobrantes = []
+botellasSobrantes = 0
+latasSobrantes = 0
 heladeras = []
-semaforoHeladeras = threading.Semaphore(0)
+semaforoHeladeras = threading.Semaphore(1)
 
-cantidadHeladeras = 1
-cantidadProveedores = 1
+cantidadHeladeras = 2
+cantidadProveedores = 2
+
+
+def hayHeladerasDisponibles():
+    i = 0
+    resultado = False
+    while i < len(heladeras):
+        h = heladeras[i]
+        if h.hayEspacio():
+            resultado = True
+        i += 1
+    return resultado
+
+def elegirHeladera():
+    global heladeras
+    i = 0
+    if hayHeladerasDisponibles():
+        heladeraConEspacio = None
+        try:
+            while i < len(heladeras):
+                heladeraActual = heladeras[i]
+                while heladeraActual.hayEspacio():
+                    heladeraConEspacio = heladeraActual
+                    raise Exception("Se encontro")
+                i += 1
+        except:
+            return heladeraConEspacio
 
 class Heladera():
     def __init__(self, nombre):
         self.botellas = []
         self.latas = []
         self.nombre = nombre
-
-    def enchufar(self):
-        print("Enchufando heladera..")
-        time.sleep(2)
-
-    def enfriamientoRapido(self):
-        print("Iniciando el enfriamiento rapido")
-        time.sleep(1)
 
     def hayEspacio(self):
         if len(self.botellas) == 10 and len(self.latas) == 15:
@@ -35,11 +53,12 @@ class Heladera():
 
     def agregarBotella(self, cantidad):
         aPoner = cantidad
-        print("Agregando " + str(cantidad) + " Botellas en heladera " + str(self.nombre))
+
         while len(self.botellas) < 10:
             self.botellas.append(1)
             aPoner -= 1
-            time.sleep(1)
+        time.sleep(2)
+
         if aPoner > 0:
             return aPoner
         else:
@@ -47,11 +66,12 @@ class Heladera():
     
     def agregarLata(self, cantidad):
         aPoner = cantidad
-        print("Agregando " + str(cantidad) + " Latas en heladera " + str(self.nombre))
+        
         while len(self.latas) < 15:
             self.latas.append(1)
             aPoner -= 1
-            time.sleep(1)
+        time.sleep(2)
+
         if aPoner > 0:
             return aPoner
         else:
@@ -69,56 +89,40 @@ class Proveedor(threading.Thread):
 
     def reponer(self, heladera):
         global botellasSobrantes, latasSobrantes
+        botellasAPoner = self.cantAPoner() + botellasSobrantes
+        latasAPoner = self.cantAPoner() + latasSobrantes
 
-        sobranteBotellas = heladera.agregarBotella(self.cantAPoner())
-        sobranteLatas = heladera.agregarLata(self.cantAPoner())
+        logging.info("Agregando " + str(botellasAPoner) + " Botellas en heladera " + str(heladera.nombre))
+        sobranteBotellas = heladera.agregarBotella(botellasAPoner)
 
-        while sobranteBotellas > 0:
-            botellasSobrantes.append(1)
-            sobranteBotellas -= 1
-        while sobranteLatas > 0:
-            latasSobrantes.append(1)
-            latasSobrantes -= 1
+        logging.info("Agregando " + str(latasAPoner) + " Latas en heladera " + str(heladera.nombre))
+        sobranteLatas = heladera.agregarLata(latasAPoner)
+
+        logging.info("Sobraron " + str(sobranteBotellas) + " Botellas y " + str(sobranteLatas) + " latas.")
+
+        botellasSobrantes += sobranteBotellas
+        latasSobrantes += sobranteLatas
 
     def run(self):
-        while True:
-            
-            self.reponer(elegirHeladera)
-            time.sleep(5)
-            
-def hayHeladerasDisponibles():
-    i = 0
-    resultado = False
-    while i < len(heladeras):
-        h = heladeras[i]
-        if h.hayEspacio:
-            resultado = True
+        semaforoHeladeras.acquire()
+
+        if hayHeladerasDisponibles():
+            self.reponer(elegirHeladera())
         else:
-            pass
-    return resultado
+            logging.info("Las heladeras estan llenas!")
 
-def elegirHeladera():
-    global heladeras
-    i = 0
+        semaforoHeladeras.release()
 
-    if hayHeladerasDisponibles():
-        heladeraConEspacio = None
-        try:
-            while i < len(heladeras):
-                heladeraActual = heladeras[i]
-                if heladeraActual.hayEspacio:
-                    heladeraConEspacio = heladeraActual
-                    raise Exception("Se encontro")
-                i += 1
-        except:
-            return heladeraConEspacio
+                
+                    
     
           
 for i in range(cantidadHeladeras):
     heladeras.append(Heladera(i))
 
 for i in range(cantidadProveedores):
-    Proveedor(i).start()
+    nombre = 'Proveedor ' + str(i)
+    Proveedor(nombre).start()
 
 
 
