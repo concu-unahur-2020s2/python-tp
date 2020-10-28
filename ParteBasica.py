@@ -10,18 +10,26 @@ logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(threadName)s] - %(message
 
 class Heladera:
 
-    def __init__(self,nombre,cantLatasMax,cantBotellasMax):
+    def __init__(self,cantLatasMax,cantBotellasMax):
         self.cantLatasMax = cantLatasMax
         self.cantBotellaMax = cantBotellasMax
-        self.nombre = nombre
+        self.cantTotalLatas = 0
+        self.cantTotalBotellas = 0
+
+
+    def estaLLena(self):
+        return self.cantTotalLatas <= self.cantLatasMax
 
     def ponerLatas(self, cant):
-        total = 0
-        while self.cantLatasMax < cant:
-            total += cant
+        if not self.estaLLena():
+            print('esta llena')
+            self.cantTotalLatas += cant
 
+    def ponerBotellas(self,cant):
+        self.cantTotalBotellas += cant
 
-heladera = Heladera()
-heladera.ponerLatas(2)
-print(heladera.cantLatasMax)
+heladera = Heladera(15,10)
+heladera.ponerLatas(18)
+print(heladera.cantTotalLatas)
+print(heladera.estaLLena())
 
