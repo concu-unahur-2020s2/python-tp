@@ -120,7 +120,7 @@ class Proveedor(threading.Thread):
         semaforoHeladeras.release()
 
                 
-                          
+    
 for i in range(cantidadHeladeras):
     heladeras.append(Heladera(i))
 
