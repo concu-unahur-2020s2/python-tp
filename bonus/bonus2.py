@@ -34,7 +34,20 @@ def elegirHeladera():
         if heladeraConEspacio == len(heladeras):
             heladeraConEspacio = 0
         else:
-            logging.info("Enchufando heladera "+ str(heladeras[heladeraConEspacio].nombre) + "\n")
+            logging.info("Enchufando heladera "+ str(heladeras[heladeraConEspacio].nombre)+ "\n")
+
+def lataPinchada():
+    global heladeras
+    indiceRandom = random.randint(0,len(heladeras)-1)
+    h = heladeras[indiceRandom]
+    caso = random.choice([0,1,2,3,4])
+    if caso == 3:
+        h.latas.pop(0)
+        print("Se ha pinchado una lata \n")
+
+
+        
+
 
 class Heladera():
     def __init__(self, nombre):
@@ -83,7 +96,7 @@ class Heladera():
         except:
             pass
         time.sleep(random.randint(3, 10))
-
+        lataPinchada()
         if aPoner > 0:
             return aPoner
         else:
@@ -91,6 +104,7 @@ class Heladera():
     
     def estadoActual(self):
         return "La heladera "+ str(self.nombre) +" tiene " + str(len(self.botellas)) + " Botellas y "+ str(len(self.latas)) + " Latas"
+
 
 
 class Proveedor(threading.Thread):
@@ -152,10 +166,9 @@ class Beode(threading.Thread):
             logging.info("Estoy bebiendo "+ self.tipoDeConsumo + " de la heladera " + str(heladera.nombre) + " voy tomando "+ str(self.consumo) + "\n")
             semaforoHeladeras.release()
         else:
-            logging.info("No hay lo que quiero tomar en la heladera " + str(heladera.nombre) + "\n")
             semaforoHeladeras.release()
+            logging.info("No hay lo que quiero tomar en la heladera " + str(heladera.nombre) + "\n")
             self.monitor.wait()
-
     
     def consumirLata(self, heladera):
         semaforoHeladeras.acquire()
@@ -165,8 +178,8 @@ class Beode(threading.Thread):
             logging.info("Estoy bebiendo "+ self.tipoDeConsumo + " de la heladera " + str(heladera.nombre) + " voy tomando "+ str(self.consumo) + "\n")
             semaforoHeladeras.release()
         else:
-            logging.info("No hay lo que quiero tomar en la heladera " + str(heladera.nombre) + "\n")
             semaforoHeladeras.release()
+            logging.info("No hay lo que quiero tomar en la heladera " + str(heladera.nombre) + "\n")
             self.monitor.wait()
 
     def consumir(self,heladera):
@@ -180,7 +193,7 @@ class Beode(threading.Thread):
                 self.consumirBotella(heladera)
             if alAzar == 1:
                 self.consumirLata(heladera)
-        time.sleep(3)    
+        time.sleep(3)
 
     def run(self):
         while self.consumo < self.limite:
@@ -188,11 +201,16 @@ class Beode(threading.Thread):
                 self.consumir(self.elegirHeladera())
         logging.info("Me canse de tomar me voy a dormir")
                 
-            
+             
 
+            
 for i in range(cantidadHeladeras):
     heladeras.append(Heladera(i))
+time.sleep(5)
 
+for i in range(cantidadProveedores):
+    nombre = 'Proveedor ' + str(i)
+    Proveedor(nombre).start()
 
 bb = Beode(monitorBeode,"Pepe",5,"botella")  
 bb.start()  
@@ -202,10 +220,6 @@ bl.start()
 
 ba= Beode(monitorBeode,"Barbi", 5, "ambos")
 ba.start()
-
-for i in range(cantidadProveedores):
-    nombre = 'Proveedor ' + str(i)
-    Proveedor(nombre).start()
 
 
 
