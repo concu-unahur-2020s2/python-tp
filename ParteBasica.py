@@ -6,6 +6,7 @@ import time
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(threadName)s] - %(message)s', datefmt='%H:%M:%S',
                     level=logging.INFO)
 
+semaforoHeladera = threading.Semaphore()
 
 class Heladera:
 
@@ -28,17 +29,34 @@ class Heladera:
         cantAPoner = cant
         sobrante = self.cantLatasMax - cant
 
-        while cantAPoner > 0:
+
+        while self.cantTotalLatas <= self.cantLatasMax:
+        #while cantAPoner > 0 :
             if self.hayLugarLatas():
                 self.ponerLata()
-                cantAPoner -= 1
+
             else:
-                raise Exception('no hay mas lugar')
+                raise Exception('no hay mas lugar en la heladera....')
+            cantAPoner -= 1
+
+
+
+
+class Proveedor(threading.Thread):
+
+    def __int__(self, nombre):
+        super().__init__()
+        self.nombre = nombre
+
+
+    #def run(self):
+
+
 
 
 
 heladera = Heladera(15, 10)
 print(heladera.cantTotalLatas)
-heladera.llenarHeladeraConLatas(17)
+heladera.llenarHeladeraConLatas(18)
 print(heladera.hayLugarLatas())
 print(heladera.cantTotalLatas)
