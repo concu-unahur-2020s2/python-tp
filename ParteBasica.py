@@ -36,14 +36,17 @@ class Heladera(threading.Thread):
         self.cantTotalBotellas += 1
 
     def llenarHeladeraConLatas(self):
+
         global latasSobrantes, cantLatas
         latasSobrantes = cantLatas - self.cantTotalLatas
         while cantLatas > 0:
             if self.cantidadEspacioDiponibleLatas() > 0:
                 self.ponerLata()
-            self.cantTotalLatas -= 1
+            cantLatas -= 1
         logging.info("poniendo  lata...")
         time.sleep(random.randint(1, 2))
+        logging.info(f'{self.cantTotalLatas}')
+        logging.info(f'{latasSobrantes}')
 
     def llenarHeladeraConBotellas(self):
 
@@ -52,24 +55,28 @@ class Heladera(threading.Thread):
         while cantBotellas > 0:
             if self.cantidadEspacioDiponibleBotellas() > 0:
                 self.ponerBotella()
-            self.cantTotalBotellas -= 1
+            cantBotellas -= 1
         logging.info("poniendo botellas")
         time.sleep(random.randint(1, 2))
 
     def llenarTodaLaHeladera(self):
-        while self.noEstaLLena():
+
+        while not self.estaLLena():
             self.llenarHeladeraConBotellas()
             self.llenarHeladeraConLatas()
-            logging.info('heladera llena...')
-            logging.info(f'{self.cantTotalLatas}')
-            logging.info(f'{self.cantTotalBotellas}')
-            logging.info(f'{latasSobrantes}')
+        logging.info('heladera llena...')
+        logging.info(f'{self.cantTotalLatas}')
+        logging.info(f'{self.cantTotalBotellas}')
+        logging.info(f'{latasSobrantes}')
+
 
     def run(self):
+        semaforoHeladera.acquire()
         self.llenarTodaLaHeladera()
+        semaforoHeladera.release()
 
-    def noEstaLLena(self):
-        return self.cantTotalBotellas <= self.cantBotellaMax and self.cantTotalLatas <= self.cantLatasMax
+    def estaLLena(self):
+        return self.cantTotalBotellas == self.cantBotellaMax and self.cantTotalLatas == self.cantLatasMax
 
 
 class Proveedor(threading.Thread):
