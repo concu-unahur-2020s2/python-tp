@@ -42,7 +42,7 @@ def lataPinchada():
     indiceRandom = random.randint(0,len(heladeras)-1)
     h = heladeras[indiceRandom]
     if h.hayLatas():
-        caso = 3 #random.choice([0,1,2,3])
+        caso = random.choice([0,1,2,3])
         if caso == 3:
             h.latas.pop(0)
             print("Se ha pinchado una lata en la heladera ", h.nombre, "\n")
@@ -97,7 +97,7 @@ class Heladera():
         except:
             pass
         time.sleep(random.randint(3, 10))
-        lataPinchada()
+        
         if aPoner > 0:
             return aPoner
         else:
@@ -139,10 +139,10 @@ class Proveedor(threading.Thread):
         latasSobrantes += sobranteLatas
 
     def run(self):
-        global heladeraConEspacio
         with self.monitor:
             if hayHeladerasDisponibles():
                 self.reponer(elegirHeladera())
+                lataPinchada()
                 self.monitor.notify()
             else:
                 logging.info("Las heladeras estan llenas!")
