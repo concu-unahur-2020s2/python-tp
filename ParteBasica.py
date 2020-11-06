@@ -108,6 +108,8 @@ class Proveedor(threading.Thread):
         while True:
             self.decargarLatas()
             self.descargarBotellas()
+            logging.info(f'latas sobrantes : {latasSobrantes} '
+                         f'botellas sobrantes : {cantBotellas}')
 
 
 cantHeladeras = 2
