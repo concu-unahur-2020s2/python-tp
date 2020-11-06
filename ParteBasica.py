@@ -16,12 +16,14 @@ semaforoHeladera = threading.Semaphore()
 
 class Heladera(threading.Thread):
 
-    def __init__(self, cantLatasMax, cantBotellasMax):
+    def __init__(self,numero):
         super().__init__()
-        self.cantLatasMax = cantLatasMax
-        self.cantBotellaMax = cantBotellasMax
+
+        self.cantLatasMax = 15
+        self.cantBotellaMax = 10
         self.cantTotalLatas = 0
         self.cantTotalBotellas = 0
+        self.name = f'Heladera{numero}'
 
     def cantidadEspacioDiponibleLatas(self):
         return self.cantLatasMax - self.cantTotalLatas
@@ -45,8 +47,6 @@ class Heladera(threading.Thread):
             cantLatas -= 1
         logging.info("poniendo  lata...")
         time.sleep(random.randint(1, 2))
-        logging.info(f'{self.cantTotalLatas}')
-        logging.info(f'{latasSobrantes}')
 
     def llenarHeladeraConBotellas(self):
 
@@ -65,26 +65,28 @@ class Heladera(threading.Thread):
             self.llenarHeladeraConBotellas()
             self.llenarHeladeraConLatas()
         logging.info('heladera llena...')
-        logging.info(f'{self.cantTotalLatas}')
-        logging.info(f'{self.cantTotalBotellas}')
-        logging.info(f'{latasSobrantes}')
-
 
     def run(self):
         semaforoHeladera.acquire()
-        self.llenarTodaLaHeladera()
-        semaforoHeladera.release()
+        while not self.estaLLena():
+            self.llenarTodaLaHeladera()
+            logging.info(f'cantidad de latas en heladera {self.cantTotalLatas}')
+            logging.info(f'cantidad de botellas en la heladera {self.cantTotalBotellas}')
+            semaforoHeladera.release()
+        logging.info(f'cantidad de latas sobrantes {latasSobrantes}')
+        logging.info(f' cantidad de botellas  sobrantes {botellasSobrantes}')
 
     def estaLLena(self):
         return self.cantTotalBotellas == self.cantBotellaMax and self.cantTotalLatas == self.cantLatasMax
 
 
 class Proveedor(threading.Thread):
-    def __init__(self, nombre):
+    def __init__(self, numero):
         super().__init__()
-        self.nombre = nombre
+        self.nombre = f'Proovedor {numero}'
         self.latasAEntregar = random.randint(1, 15)
         self.botellasAEntregar = random.randint(1, 10)
+
 
     def decargarLatas(self):
 
@@ -103,16 +105,16 @@ class Proveedor(threading.Thread):
         time.sleep((random.randint(1, 2)))
 
     def run(self):
-        self.decargarLatas()
-        self.descargarBotellas()
+        while True:
+            self.decargarLatas()
+            self.descargarBotellas()
 
 
-heladera = Heladera(10, 15)
-heladera.start()
+cantHeladeras = 2
+cantProovedores = 4
 
-proveedor = Proveedor('quilmes')
-proveedor2 = Proveedor('corona')
-listaProveedores = [proveedor, proveedor2]
+for h in range(cantHeladeras):
+    Heladera(h).start()
 
-for i in listaProveedores:
-    i.start()
+for p in range(cantProovedores):
+    Proveedor(p).start()
