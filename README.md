@@ -1,3 +1,5 @@
+# TP realizado por Fabiola Suarez y Fragata Adrian
+
 # Python TP
 Somos los encargados de organizar una fiesta, y se nos encomendó llenar las heladeras de cerveza.
 
