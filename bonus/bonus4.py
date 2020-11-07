@@ -10,8 +10,8 @@ latasSobrantes = 0
 heladeras = []
 monitorBeode = threading.Condition()
 
-cantidadHeladeras = 5
-cantidadProveedores = 20
+cantidadHeladeras = 10
+cantidadProveedores = 30
 
 
 def hayHeladerasDisponibles():
@@ -44,17 +44,18 @@ def hayEspacioParaLatas():
         i += 1
     return resultado
 
-def elegirHeladera():
-    global heladeras
-    heladeraConEspacio = 0
-    heladeraMasVacia = heladeras[0]
-    while heladeraConEspacio < len(heladeras):
-        heladeraActual = heladeras[heladeraConEspacio]
+def elegirHeladera(listaHeladeras=heladeras):
+    i = 0
+    indiceHeladeraConEspacio = 0
+    heladeraMasVacia = listaHeladeras[0]
+    while i < len(listaHeladeras):
+        heladeraActual = listaHeladeras[i]
         if  heladeraActual.hayEspacio():
             if heladeraActual.cantidadDeCervezas() < heladeraMasVacia.cantidadDeCervezas():
                 heladeraMasVacia = heladeraActual
-        heladeraConEspacio +=1
-    return heladeraMasVacia
+                indiceHeladeraConEspacio = i
+        i +=1
+    return heladeraMasVacia, indiceHeladeraConEspacio
   
 
 def lataPinchada():
@@ -163,56 +164,54 @@ class Proveedor(threading.Thread):
 
         if sobranteBotellas > 0 or sobranteLatas > 0:
             self.reponerSobrantes(sobranteBotellas, sobranteLatas)
-            
 
-    
     def reponerSobrantes(self, botellasAPoner, latasAPoner):
-        global botellasSobrantes, latasSobrantes
+        global botellasSobrantes, latasSobrantes, heladeras
 
+        heladerasDisponibles = heladeras.copy()
         sobranteBotellas = botellasAPoner
         sobranteLatas = latasAPoner
 
         while sobranteBotellas > 0 or sobranteLatas > 0:
-            heladera = elegirHeladera()
+            heladera, indice = elegirHeladera(heladerasDisponibles)
 
             if botellasAPoner > 0:
                 if hayEspacioParaBotellas():
-                    print("Hay espacio para botellas", str(hayEspacioParaBotellas()))
-
                     if heladera.hayEspacioParaBotellas():
-                        logging.info("Ingreso " + str(botellasAPoner) + " Botellas")
+                        logging.info("Ingreso " + str(botellasAPoner) + " Botellas sobrantes")
                         sobranteBotellas = heladera.agregarBotella(botellasAPoner)
+                    else:
+                        logging.info("No hay lugar para botellas en la heladera " + str(heladera.nombre))
                 else:
-                    logging.info("No hay lugar para botellas en la heladera " + str(heladera.nombre))
                     botellasSobrantes += sobranteBotellas
                     sobranteBotellas = 0
 
             if latasAPoner > 0:
                 if hayEspacioParaLatas():
-                    print("Hay espacio para botellas", str(hayEspacioParaBotellas()))
-
                     if heladera.hayEspacioParaLatas():
-                        logging.info("Ingreso " + str(latasAPoner) + " Latas")
+                        logging.info("Ingreso " + str(latasAPoner) + " Latas sobrantes")
                         sobranteLatas = heladera.agregarLata(latasAPoner)
+                    else:
+                        logging.info("No hay lugar para latas en la heladera " + str(heladera.nombre))
                 else:
-                    logging.info("No hay lugar para latas en la heladera " + str(heladera.nombre))
                     latasSobrantes += sobranteLatas
                     sobranteLatas = 0
+            
+            heladerasDisponibles.pop(indice)
 
             logging.info(heladera.estadoActual() + ". Cantidad total de cervezas = " + str(heladera.cantidadDeCervezas()))
-            logging.info("Sobraron " + str(sobranteBotellas) + " Botellas y " + str(sobranteLatas) + " latas.\n")
-
-
-            
+            logging.info("Sobraron " + str(botellasSobrantes) + " Botellas y " + str(latasSobrantes) + " latas.\n")
 
     def run(self):
         with self.monitor:
             if hayHeladerasDisponibles():
-                self.reponer(elegirHeladera(), self.cantAPoner() + botellasSobrantes, self.cantAPoner() + latasSobrantes)
+                heladera, indice = elegirHeladera()
+                self.reponer(heladera, self.cantAPoner() + botellasSobrantes, self.cantAPoner() + latasSobrantes)
                 lataPinchada()
                 self.monitor.notify()
             else:
                 logging.info("Las heladeras estan llenas!")
+
 
 class Beode(threading.Thread):
     def __init__(self,monitor, nombre, limite,tipoDeConsumo):
