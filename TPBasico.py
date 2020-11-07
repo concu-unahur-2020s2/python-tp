@@ -12,8 +12,8 @@ botellasSobrantes = 0
 latasEntregadas = 10
 botellasEntregadas = 0
 heladeras = []
-cantHeladeras = 2
-cantProvedores = 4
+cantHeladeras = random.randint(1,10)
+cantProvedores = random.randint(1,5)
 
 semaforoHeladera = threading.Semaphore()
 
